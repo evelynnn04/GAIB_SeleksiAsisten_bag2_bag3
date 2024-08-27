@@ -1,11 +1,23 @@
 import numpy as np
 from collections import deque
 
+def euclidean_distance(x1, x2):
+    return np.sqrt(np.sum((x1 - x2) ** 2))
+
+def manhattan_distance(x1, x2):
+    return np.sum(np.abs(x1 - x2))
+
+def minkowski_distance(x1, x2, p):
+    print( np.sum(np.abs(x1 - x2) ** p) ** (1 / p))
+    return np.sum(np.abs(x1 - x2) ** p) ** (1 / p)
+
 class DBSCAN_Selfmade:
-    def __init__(self, eps=0.5, min_samples=5):
+    def __init__(self, eps=0.5, min_samples=5, metric='euclidean', p = 3):
         self.eps = eps # Ini jaraknya (euclidean)
         self.min_samples = min_samples # Minimal node satu cluster
         self.labels = None 
+        self.metric = metric
+        self.p = p
 
     def fit(self, X):
         n_points = X.shape[0]
@@ -25,8 +37,15 @@ class DBSCAN_Selfmade:
     def _region_query(self, X, point_idx):
         neighbors = []
         for i in range(X.shape[0]):
-            if np.linalg.norm(X[point_idx] - X[i]) < self.eps:
-                neighbors.append(i)
+            if self.metric == 'euclidean':
+                if euclidean_distance(X[point_idx], X[i]) < self.eps:
+                    neighbors.append(i)
+            elif self.metric == 'manhattan':
+                if manhattan_distance(X[point_idx], X[i]) < self.eps:
+                    neighbors.append(i)
+            elif self.metric == 'minkowski':
+                if minkowski_distance(X[point_idx], X[i], self.p) < self.eps:
+                    neighbors.append(i)
         return neighbors
 
     def _expand_cluster(self, X, point_idx, neighbors, cluster_id):
