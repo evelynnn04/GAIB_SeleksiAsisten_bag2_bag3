@@ -1,53 +1,46 @@
 import numpy as np
-import pandas as pd
 from collections import Counter
 
 def euclidean_distance(x1, x2):
-    return np.sqrt(np.sum((x1 - x2) ** 2))
+    return np.sqrt(np.sum((x1 - x2) ** 2, axis=1))
 
 def manhattan_distance(x1, x2):
-    return np.sum(np.abs(x1 - x2))
+    return np.sum(np.abs(x1 - x2), axis=1)
 
 def minkowski_distance(x1, x2, p=3):
-    return np.sum(np.abs(x1 - x2) ** p) ** (1 / p)
+    return np.sum(np.abs(x1 - x2) ** p, axis=1) ** (1 / p)
 
 class KNN_Selfmade:
     def __init__(self, neighbors=3, metric='euclidean', p=3):
+        '''
+        neighbor: jumlah tetangga (N) yang nantinya bakal diambil top N tetangga paling deket buat dicari modusnya dalam case binary classification 
+        metric: cara perhitungan jarak 
+        p: parameter order buat minkowski 
+        '''
         self.neighbors = neighbors
         self.metric = metric
-        self.p = p  # ini buat minkowski
+        self.p = p
     
     def fit(self, X, y):
         self.X_train = X.to_numpy()
         self.y_train = y.to_numpy()
     
     def predict(self, X):
-        y_pred = []
-        for row_x in X.to_numpy():
-            y_pred.append(self._predict(row_x))
-        return np.array(y_pred)
+        X = X.to_numpy()
+        distances = self._compute_distances(X)
+        return np.array([self._predict_single(d) for d in distances])
     
-    def _predict(self, x):
-        arr = {}
+    def _compute_distances(self, X):
         if self.metric == 'euclidean':
-            for i in range(len(self.X_train)):
-                index = i
-                distance = euclidean_distance(x, self.X_train[i])
-                arr[index] = distance
+            return np.array([euclidean_distance(x, self.X_train) for x in X])
         elif self.metric == 'manhattan':
-            for i in range(len(self.X_train)):
-                index = i
-                distance = manhattan_distance(x, self.X_train[i])
-                arr[index] = distance
+            return np.array([manhattan_distance(x, self.X_train) for x in X])
         elif self.metric == 'minkowski':
-            for i in range(len(self.X_train)):
-                index = i
-                distance = minkowski_distance(x, self.X_train[i])
-                arr[index] = distance
+            return np.array([minkowski_distance(x, self.X_train, self.p) for x in X])
         else:
-            raise ValueError(f"Unsupported distance! Please choose between 'euclidean', 'manhattan', or 'minkowski'!")
-        
-        top3_arr = sorted(arr.items(), key=lambda item: item[1])[0:self.neighbors]
-        top_n_index = [x[0] for x in top3_arr]
-        top_n_labels = [self.y_train[i] for i in top_n_index]
+            raise ValueError(f"Unsupported metric! Please choose between 'euclidean', 'manhattan', or 'minkowski'!")
+    
+    def _predict_single(self, distances):
+        top_n_indices = np.argsort(distances)[:self.neighbors]
+        top_n_labels = self.y_train[top_n_indices]
         return Counter(top_n_labels).most_common(1)[0][0]

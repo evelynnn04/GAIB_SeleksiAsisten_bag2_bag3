@@ -3,6 +3,12 @@ import pandas as pd
 
 class Gaussian_Naive_Bayes_Selfmade:
     def __init__(self):
+        '''
+        classes : seluruh nilai prediksi (distinct)
+        mean: rata-rata
+        var: variansi 
+        priors: probabilitas awal
+        '''
         self.classes = None
         self.mean = None
         self.var = None

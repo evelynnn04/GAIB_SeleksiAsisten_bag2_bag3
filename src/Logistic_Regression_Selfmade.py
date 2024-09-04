@@ -1,8 +1,14 @@
 import numpy as np
-import pandas as pd
 
 class Logistic_Regression_Selfmade:
     def __init__(self, learning_rate=0.01, n_iterations=1000, regularization=None, reg_lambda=0.01, loss_function='cross_entropy'):
+        '''
+        learning rate: laju belajarnya buat ngontrol seberapa besar perubahan weight dan bias 
+        n_iteration: jumlah iterasi 
+        regularization: nambahin penalti buat ngurangin overfitting
+        reg_lamda: koefiisien penalti buat ngontrol seberapa besar penalti pada weight di proses regularization 
+        loss function: buat ngitung kesalahan antara y_pred dan y_test 
+        '''
         self.learning_rate = learning_rate
         self.n_iterations = n_iterations
         self.regularization = regularization
@@ -12,19 +18,24 @@ class Logistic_Regression_Selfmade:
         self.bias = None
     
     def sigmoid(self, x):
-        x = np.clip(x, -(2**4-1), 2**4-1) # buat ngebatesin biar ga warning terus wkwk, hasilnya juga lebih bagus aneh bgt wkwk (NANTI TANYAIN DEH)
+        x = np.clip(x, -(2**4-1), 2**4-1) # buat ngebatesin biar ga warning terus wkwk
         return 1 / (1 + np.exp(-x)) # rumusnya emang gini wkwk
     
     def compute_loss(self, y, y_predicted):
         epsilon = 1e-10 # Ini biar ga log(0) biar lossnya ga inf
-        y_predicted = np.clip(y_predicted, epsilon, 1 - epsilon) # buat ngebatesin biar ga warning terus wkwk
+        y_predicted = np.clip(y_predicted, epsilon, 1 - epsilon) # buat ngebatesin biar ga warning terus, hasilnya juga lebih bagus wkwk
         if self.loss_function == 'cross_entropy':
             return -np.mean(y * np.log(y_predicted) + (1 - y) * np.log(1 - y_predicted))
         elif self.loss_function == 'mse':
             return np.mean((y - y_predicted) ** 2)
-        # TODO: Tambahin MAE, RMSE biar dapet bonus wkwk
+        elif self.loss_function == 'mae':
+            return np.mean(np.abs(y - y_predicted))
+        elif self.loss_function == 'rmse':
+            return np.sqrt(np.mean((y - y_predicted) ** 2))
+        elif self.loss_function == 'hinge':
+            return np.mean(np.maximum(0, 1 - y * (2 * y_predicted - 1)))
         else:
-            raise ValueError("Unsupported loss function! Choose between 'cross_entropy' or 'mse'!")
+            raise ValueError("Unsupported loss function! Choose between 'cross_entropy', 'mse', 'mae', 'rmse' or 'hinge'!")
     
     def add_regularization(self, loss): 
         # Regularization intinya buat ngurangin weight (y = x . weight + e) biar kalo ada kenaikan/penurunan x, y nya ga tbtb loncat wkwk
