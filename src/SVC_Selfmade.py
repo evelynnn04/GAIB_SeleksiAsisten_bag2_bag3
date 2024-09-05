@@ -17,10 +17,10 @@ class SVC_Selfmade:
         self.w = None
         self.b = None
     
-    def _linear_kernel(self, X):
+    def _linear_kernel(self, X): # Ini jadi 2D
         return X
     
-    def _polynomial_kernel(self, X, degree=3):
+    def _polynomial_kernel(self, X, degree=3): # Ini juga jadi 2D
         return np.power(X, degree)
     
     def _rbf_kernel(self, X, gamma=None):
@@ -66,3 +66,8 @@ class SVC_Selfmade:
         K = self._compute_kernel(X) 
         approx = np.dot(K, self.w) - self.b
         return [1 if x >= self.threshold else 0 for x in approx]
+    
+
+'''
+Jadi ini inti kodenya tuh bikin persamaan hyperplane, terus dinaikin dimensinya pake kernel
+'''

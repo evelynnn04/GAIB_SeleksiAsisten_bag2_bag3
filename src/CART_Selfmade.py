@@ -13,9 +13,9 @@ def information_gain(y, y_left, y_right):
     return gini(y) - (p_left * gini(y_left) + p_right * gini(y_right))
 
 def split_dataset(X, y, feature_index, threshold):
-    left_mask = X[:, feature_index] <= threshold
-    right_mask = ~left_mask
-    return X[left_mask], y[left_mask], X[right_mask], y[right_mask]
+    left_mask = X[:, feature_index] <= threshold # semua x yg kurang dari threshold
+    right_mask = ~left_mask # lainnya 
+    return X[left_mask], y[left_mask], X[right_mask], y[right_mask] # dataframe yg isinya true false
 
 class Node:
     def __init__(self, feature_index=None, threshold=None, left=None, right=None, value=None):
@@ -45,14 +45,15 @@ class CART_Selfmade:
         n_samples, n_features = X.shape
         n_labels = len(np.unique(y))
 
+        # Ini kalo udah ga nyabang lagi
         if (depth >= self.max_depth or n_labels == 1 or n_samples < self.min_samples_split):
             leaf_value = self._most_common_label(y)
             return Node(value=leaf_value)
 
         best_feature, best_threshold = self._best_split(X, y, n_features)
         
-        if best_feature is None:
-            leaf_value = self._most_common_label(y)
+        if best_feature is None: # udah gabisa displit 
+            leaf_value = self._most_common_label(y) # berarti kalo masuk leaf ini labelnya modusnya 
             return Node(value=leaf_value)
 
         X_left, y_left, X_right, y_right = split_dataset(X, y, best_feature, best_threshold)
@@ -65,19 +66,19 @@ class CART_Selfmade:
         split_index, split_threshold = None, None
 
         for feature_index in range(n_features):
-            thresholds = np.unique(X[:, feature_index])
+            thresholds = np.unique(X[:, feature_index]) # cari yg unique buat jadi threshold
             for threshold in thresholds:
                 X_left, y_left, X_right, y_right = split_dataset(X, y, feature_index, threshold)
-                if len(y_left) == 0 or len(y_right) == 0:
+                if len(y_left) == 0 or len(y_right) == 0: # datanya masuk ke salah satu cabang semua 
                     continue
 
-                gain = information_gain(y, y_left, y_right)
+                gain = information_gain(y, y_left, y_right) # seberapa banyak impuritynya berkurang 
                 if gain > best_gain:
                     best_gain = gain
                     split_index = feature_index
                     split_threshold = threshold
 
-        return split_index, split_threshold
+        return split_index, split_threshold # dapet split2annya 
 
     def _most_common_label(self, y):
         return np.bincount(y).argmax()
@@ -92,3 +93,8 @@ class CART_Selfmade:
         if x[node.feature_index] <= node.threshold:
             return self._traverse_tree(x, node.left)
         return self._traverse_tree(x, node.right)
+
+'''
+Intinya di tiap cabang, dia cari split2an paling bagus (gainnya paling gede), terus direturn, terus nanti grow tree ke kiri sama kanan based on split2annya tadi.
+Buat ngepredict tinggal ditraverse yeay kelar
+'''

@@ -113,7 +113,7 @@ class ANN_Selfmade():
                 self.momemtum_opt[key] = (beta * self.momemtum_opt[key] + (1. - beta) * self.grads[key])
                 self.params[key] = self.params[key] - l_rate * self.momemtum_opt[key]
         else:
-            raise ValueError("Optimizer is currently not support, please use 'sgd' or 'momentum' instead.")
+            raise ValueError("Optimizer not supported, please choose between 'sgd' or 'momentum'!")
 
     def accuracy(self, y, output):
         predictions = (output.T > 0.5).astype(int)
