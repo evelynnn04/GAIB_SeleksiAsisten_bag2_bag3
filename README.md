@@ -13,7 +13,7 @@ Hello! I'm Evelyn Yosiana with NIM 13522083. <br>
 
 Clone this repository with the command 
 shell
-Git clone https://github.com/evelynnn04/Gaib_SeleksiAsisten_Bag2_Bag3.git
+Git clone https://github.com/evelynnn04/GAIB_SeleksiAsisten_bag2_bag3.git
 Enter the src folder with the command 
 shell
 cd src
