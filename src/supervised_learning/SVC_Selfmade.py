@@ -66,7 +66,6 @@ class SVC_Selfmade:
         K = self._compute_kernel(X) 
         approx = np.dot(K, self.w) - self.b
         return [1 if x >= self.threshold else 0 for x in approx]
-    
 
 '''
 Jadi ini inti kodenya tuh bikin persamaan hyperplane, terus dinaikin dimensinya pake kernel
