@@ -12,6 +12,12 @@ def minkowski_distance(x1, x2, p):
 
 class DBSCAN_Selfmade:
     def __init__(self, eps=0.5, min_samples=5, metric='euclidean', p=3):
+        '''
+        eps: jarak maksimal biar bisa dianggep tetangga (secluster)
+        min_samples: minimal anggota dalam satu cluster 
+        metric: metric perhitungan jarak, in this case ada 3 (euclidean, manhattan, minskowski)
+        p: parameter order buat minkowski
+        '''
         self.eps = eps
         self.min_samples = min_samples
         self.labels = None

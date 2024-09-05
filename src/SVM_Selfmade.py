@@ -1,11 +1,19 @@
 import numpy as np
 
 class SVC_Selfmade:
-    def __init__(self, learning_rate=0.001, lambda_param=0.01, n_iters=1000, kernel='linear'):
+    def __init__(self, learning_rate=0.001, lambda_param=0.1, n_iterations=1000, kernel='linear', threshold=0.05):
+        '''
+        learning rate: ini buat ngontrol penambahan weightnya (nanti kan dikaliin sama weightnya, kalo lrnya gede berarti penambahan weightnya juga langsung wuzz gicu). lr gede bikin model cepet konvergen tapi bisa bikin missing optimal point. 
+        lamda_param: ini buat ngontrol penalti 
+        n_iterations: iterasinya berapa kali 
+        kernel: ini buat mapping datanya ke dimensi yang lebih tinggi 
+        threshold: ambang batas buat nentuin prediksinya 0 atau 1
+        '''
         self.learning_rate = learning_rate
         self.lambda_param = lambda_param
-        self.n_iters = n_iters
+        self.n_iterations = n_iterations
         self.kernel_type = kernel
+        self.threshold = threshold 
         self.w = None
         self.b = None
     
@@ -28,17 +36,20 @@ class SVC_Selfmade:
         elif self.kernel_type == 'rbf':
             return self._rbf_kernel(X)
         else:
-            raise ValueError("Unsupported kernel type")
+            raise ValueError("Unsupported kernel! Please choose between 'linear', 'polynomial' or 'rbf'")
     
     def fit(self, X, y):
+        X = X.values
+        y = y.values
         n_samples, n_features = X.shape
         
-        self.w = np.zeros(n_features) # In my case self.w jadi [0, 0] soalnya binary 
+        self.w = np.zeros(n_features)
         self.b = 0
         
-        y_ = np.where(y <= 0, -1, 1) # Yg 0 diconvert jadi -1, ini masalah algoritma aja sii
+        # Label encoding
+        y_ = np.where(y <= 0, -1, 1)
         
-        for _ in range(self.n_iters):
+        for _ in range(self.n_iterations):
             for idx, x_i in enumerate(X):
                 condition = y_[idx] * (np.dot(x_i, self.w) - self.b) >= 1
                 if condition:
@@ -52,5 +63,6 @@ class SVC_Selfmade:
                 self.b -= self.learning_rate * db
     
     def predict(self, X):
-        approx = np.dot(X, self.w) - self.b
-        return np.sign(approx)
+        K = self._compute_kernel(X) 
+        approx = np.dot(K, self.w) - self.b
+        return [1 if x >= self.threshold else 0 for x in approx]

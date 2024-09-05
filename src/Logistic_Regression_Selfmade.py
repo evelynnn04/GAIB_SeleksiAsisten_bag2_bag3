@@ -1,7 +1,12 @@
+'''
+References:
+- https://medium.com/@aneesha161994/loss-functions-of-classification-models-90354b14db93
+'''
+
 import numpy as np
 
 class Logistic_Regression_Selfmade:
-    def __init__(self, learning_rate=0.01, n_iterations=1000, regularization=None, reg_lambda=0.01, loss_function='cross_entropy'):
+    def __init__(self, learning_rate=0.01, n_iterations=1000, regularization=None, lambda_param=0.01, loss_function='cross_entropy', alpha=0.25, gamma=2):
         '''
         learning rate: laju belajarnya buat ngontrol seberapa besar perubahan weight dan bias 
         n_iteration: jumlah iterasi 
@@ -12,8 +17,10 @@ class Logistic_Regression_Selfmade:
         self.learning_rate = learning_rate
         self.n_iterations = n_iterations
         self.regularization = regularization
-        self.reg_lambda = reg_lambda
+        self.lambda_param = lambda_param
         self.loss_function = loss_function
+        self.alpha = alpha # buat focal
+        self.gamma = gamma # buat focal
         self.weights = None
         self.bias = None
     
@@ -26,23 +33,26 @@ class Logistic_Regression_Selfmade:
         y_predicted = np.clip(y_predicted, epsilon, 1 - epsilon) # buat ngebatesin biar ga warning terus, hasilnya juga lebih bagus wkwk
         if self.loss_function == 'cross_entropy':
             return -np.mean(y * np.log(y_predicted) + (1 - y) * np.log(1 - y_predicted))
-        elif self.loss_function == 'mse':
-            return np.mean((y - y_predicted) ** 2)
-        elif self.loss_function == 'mae':
-            return np.mean(np.abs(y - y_predicted))
-        elif self.loss_function == 'rmse':
-            return np.sqrt(np.mean((y - y_predicted) ** 2))
-        elif self.loss_function == 'hinge':
-            return np.mean(np.maximum(0, 1 - y * (2 * y_predicted - 1)))
+        
+        elif self.loss_function == 'focal': # ini cocok buat imbalanced data
+            y_predicted = np.clip(y_predicted, epsilon, 1.0 - epsilon)
+            pt = y * y_predicted + (1 - y) * (1 - y_predicted)
+            focal_loss = -self.alpha * (1 - pt) ** self.gamma * np.log(pt)
+            return np.mean(focal_loss)
+        
+        elif self.loss_function == 'logit':
+            y_predicted = np.clip(y_predicted, epsilon, 1.0 - epsilon)
+            logit_loss = - (y * np.log(y_predicted) + (1 - y) * np.log(1 - y_predicted))
+            return np.mean(logit_loss)
         else:
-            raise ValueError("Unsupported loss function! Choose between 'cross_entropy', 'mse', 'mae', 'rmse' or 'hinge'!")
+            raise ValueError("Unsupported loss function! Choose between 'cross_entropy', 'focal', 'logit'!")
     
     def add_regularization(self, loss): 
         # Regularization intinya buat ngurangin weight (y = x . weight + e) biar kalo ada kenaikan/penurunan x, y nya ga tbtb loncat wkwk
         if self.regularization == 'l2': # ridge
-            loss += (self.reg_lambda / len(self.y_train)) * self.weights
+            loss += (self.lambda_param / len(self.y_train)) * self.weights
         elif self.regularization == 'l1': # lasso
-            loss += (self.reg_lambda / len(self.y_train)) * np.sign(self.weights)
+            loss += (self.lambda_param / len(self.y_train)) * np.sign(self.weights)
         return loss
     
     def fit(self, X, y):

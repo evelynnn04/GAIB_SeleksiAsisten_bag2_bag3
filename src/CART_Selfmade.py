@@ -30,6 +30,10 @@ class Node:
 
 class CART_Selfmade:
     def __init__(self, max_depth=None, min_samples_split=2):
+        '''
+        max_depth: maksimal kedaleman cabangnya (atau sampai gini impuritynya 0)
+        min_sample_split: minimal ada berapa data biar bisa displit
+        '''
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.root = None

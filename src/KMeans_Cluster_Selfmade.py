@@ -2,6 +2,10 @@ import numpy as np
 
 class KMeans_Selfmade:
     def __init__(self, n_clusters=3, max_iter=100):
+        '''
+        n_cluster: banyaknya cluster yang ingin dibentuk
+        max_iter: banyaknya iterasi (auto berhenti kalau centroid baru dan centroid lamanya sama)
+        '''
         self.n_clusters = n_clusters
         self.max_iter = max_iter
         self.centroids = None

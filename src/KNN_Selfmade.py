@@ -43,4 +43,4 @@ class KNN_Selfmade:
     def _predict_single(self, distances):
         top_n_indices = np.argsort(distances)[:self.neighbors]
         top_n_labels = self.y_train[top_n_indices]
-        return Counter(top_n_labels).most_common(1)[0][0]
+        return Counter(top_n_labels).most_common(1)[0][0] # cari label paling banyak muncul 
